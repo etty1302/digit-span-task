@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0063)file:///D:/Etty%20Golan/Downloads/DigitSpan_ForwardNoEnter.html -->
+<!-- saved from url=(0070)file:///D:/Etty%20Golan/Downloads/digit_span_qualtrics_full%20(3).html -->
 <html lang="he" dir="rtl"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -183,24 +183,35 @@ function requestResponse(seq){
   const $submit = document.getElementById('submit');
   const $clear = document.getElementById('clear');
 
+  // לחיצה עם העכבר על המקלדת על המסך
   ui.querySelectorAll('.key').forEach(k=> k.addEventListener('click', ()=>{
     $inp.value += k.dataset.digit;
     $inp.focus();
   }));
   $clear.addEventListener('click', ()=>{ $inp.value=''; $inp.focus(); });
+
+  // אישור התשובה מתבצע רק בלחיצה על הכפתור "אישור" על המסך
   $submit.addEventListener('click', ()=> grade(seq, $inp.value.trim()) );
 
-    window.onkeydown = (ev)=>{
+  // קלט מהמקלדת הפיזית: ספרות ומחיקה בלבד, בלי שליחה אוטומטית עם Enter
+  window.onkeydown = (ev)=>{
     if (!running) return;
+    // אם הפוקוס בשדה ההקלדה, לא נאפשר ל-Enter לשלוח את התשובה
     const focusedInInput = (document.activeElement === $inp);
     if (focusedInInput){
-      // לא מאשרים בעזרת Enter, רק בלחיצה על הכפתור "אישור"
-      return;
+      if (ev.key === 'Enter'){
+        ev.preventDefault();
+        return;
+      }
     }
-    if (/^[0-9]$/.test(ev.key)){ ev.preventDefault(); $inp.value += ev.key; }
-    else if (ev.key === 'Backspace'){ ev.preventDefault(); $inp.value = $inp.value.slice(0,-1); }
+    if (/^[0-9]$/.test(ev.key)){
+      ev.preventDefault();
+      $inp.value += ev.key;
+    } else if (ev.key === 'Backspace'){
+      ev.preventDefault();
+      $inp.value = $inp.value.slice(0,-1);
+    }
   };
-
 
   $inp.focus();
   $screen.innerHTML = '<p class="hint">הזינו את הסדרה עכשיו.</p>';
@@ -266,18 +277,60 @@ function interstitialScreen(){
 }
 
 function finishTask(){
+  // עצירת המטלה וניקוי מקשי המקלדת
   running = false;
   window.onkeydown = null;
-  try{
-    if (window.gorilla && typeof gorilla.metric === 'function'){ gorilla.metric('summary', { rawScore: rawScore, totalTrials: trialLog.length }); }
-  }catch(e){}
 
+  // שליחת סיכום לגורילה (אם המטלה רצה בתוך Gorilla) – כדי לשמור תאימות לאחור
+  try{
+    if (window.gorilla && typeof gorilla.metric === 'function'){
+      gorilla.metric('summary', {
+        rawScore: rawScore,
+        totalTrials: trialLog ? trialLog.length : 0,
+        trialLog: trialLog || []
+      });
+    }
+  }catch(e){ /* ignore */ }
+
+  // מסך סיום למשתתף
   $screen.innerHTML = '<h3 role="heading" aria-level="2">סיום המטלה</h3><p>תודה על השתתפותך! מעבר אוטומטי לשאלון הבא…</p>';
   $response.innerHTML = '';
 
-  try{ if (window.gorilla && typeof gorilla.finish === 'function'){ gorilla.finish(); } }catch(e){}
-  const url = REDIRECT_URL + (REDIRECT_URL.includes('?') ? '&' : '?') + 'pid=' + encodeURIComponent(PID);
-  setTimeout(()=>{ window.location.href = url; }, 600);
+  // סיום פורמלי של המטלה בגורילה (אם רלוונטי)
+  try{
+    if (window.gorilla && typeof gorilla.finish === 'function'){
+      gorilla.finish();
+    }
+  }catch(e){ /* ignore */ }
+
+  // --- שליחה חזרה לקוולטריקס / Redirect עם נתונים ---
+  try{
+    const params = new URLSearchParams();
+    params.set('pid', PID);
+    params.set('rawScore', String(rawScore));
+    params.set('totalTrials', String(trialLog ? trialLog.length : 0));
+    if (trialLog){
+      params.set('trialLog', JSON.stringify(trialLog));
+    }
+
+    let url = REDIRECT_URL;
+    const joiner = url.includes('?') ? '&' : '?';
+    url = url + joiner + params.toString();
+
+    // שולחים הודעה להורה (קוולטריקס) שהמטלה הסתיימה – לשימוש ב-postMessage
+    try{
+      window.parent.postMessage('taskFinished', '*');
+    }catch(e){ /* ignore */ }
+
+    setTimeout(()=>{ window.location.href = url; }, 600);
+  }catch(e){
+    // במקרה של שגיאה, לפחות נבצע הפניה בסיסית עם pid
+    const url = REDIRECT_URL + (REDIRECT_URL.includes('?') ? '&' : '?') + 'pid=' + encodeURIComponent(PID);
+    try{
+      window.parent.postMessage('taskFinished', '*');
+    }catch(e2){ /* ignore */ }
+    setTimeout(()=>{ window.location.href = url; }, 600);
+  }
 }
 
 function startStage(){
