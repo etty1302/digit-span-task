@@ -47,6 +47,70 @@
     .inst-big.alt{ background:#eafff9; border-color:#ccf7ee; color:#06473f }
   </style>
 </head>
+  <script>
+(function () {
+  function $(sel, root) { return (root || document).querySelector(sel); }
+  function qa(sel, root) { return Array.from((root || document).querySelectorAll(sel)); }
+  function visible(el){ return el && el.offsetParent !== null; }
+
+  // מסתיר ומאפס את תיבת התשובה בזמן שהסדרה הבאה רצה
+  function clearResponse() {
+    qa('#screen input[type="text"], #screen input[type="number"], #screen textarea').forEach(function (el) {
+      el.value = '';
+      el.blur();
+      el.setAttribute('readonly', 'readonly');
+      el.style.opacity = '0';         // לא רואים את ההקלדה הקודמת
+      el.style.pointerEvents = 'none'; // לא ניתן להקליד בזמן הצגה
+    });
+  }
+
+  // מחזיר את תיבת התשובה כאשר מגיע שלב ההקלדה
+  function enableResponse() {
+    qa('#screen input[type="text"], #screen input[type="number"], #screen textarea').forEach(function (el) {
+      el.removeAttribute('readonly');
+      el.style.opacity = '';
+      el.style.pointerEvents = '';
+      // פוקוס נוח להקלדה
+      try { el.focus(); el.select && el.select(); } catch(_) {}
+    });
+  }
+
+  // מנקה מיד כשמאשרים (Enter/כפתור אישור)
+  function bindSubmitClear() {
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') {
+        clearResponse();
+      }
+    }, true);
+
+    document.addEventListener('click', function (e) {
+      if (e.target.closest && e.target.closest('#screen .btn.primary, #screen button.primary, #screen button[type="submit"]')) {
+        clearResponse();
+      }
+    }, true);
+  }
+
+  // עוקב אחרי שינויי המסך (#screen): אם יש שדה תשובה גלוי → מאפשר; אחרת → מסתיר/מאפס
+  function observePhase() {
+    var screen = $('#screen') || document.body;
+    new MutationObserver(function () {
+      var input = qa('#screen input[type="text"], #screen input[type="number"], #screen textarea')
+                  .find(visible);
+      if (input) {
+        enableResponse();
+      } else {
+        clearResponse();
+      }
+    }).observe(screen, { childList: true, subtree: true });
+  }
+
+  window.addEventListener('load', function () {
+    bindSubmitClear();
+    observePhase();
+  });
+})();
+</script>
+
 <body>
   <div class="wrap">
     <div class="card" role="region" aria-labelledby="title">
