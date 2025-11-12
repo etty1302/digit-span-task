@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0070)file:///D:/Etty%20Golan/Downloads/digit_span_qualtrics_full%20(1).html -->
+<!-- saved from url=(0070)file:///D:/Etty%20Golan/Downloads/digit_span_qualtrics_full%20(5).html -->
 <html lang="he" dir="rtl"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -194,11 +194,12 @@ function requestResponse(seq){
     if (!running) return;
     const focusedInInput = (document.activeElement === $inp);
     if (focusedInInput){
-      if (ev.key === 'Enter'){ ev.preventDefault(); $submit.click(); }
+      // Ignore Enter so it won't submit mid-trial
+      if (ev.key === 'Enter'){ ev.preventDefault(); }
       return;
     }
     if (/^[0-9]$/.test(ev.key)){ ev.preventDefault(); $inp.value += ev.key; }
-    else if (ev.key === 'Backspace'){ ev.preventDefault(); $inp.value = $inp.value.slice(0,-1); }
+    else if (ev.key === 'Backspace'){ ev.preventDefault(); $inp.value = $inp.value.slice(0,); }
     else if (ev.key === 'Enter'){ ev.preventDefault(); $submit.click(); }
   };
 
@@ -245,6 +246,11 @@ function grade(seq, respStr){
     attemptsUsed += 1;
     if (attemptsUsed >= PARAMS.ATTEMPTS){ nextStageOrFinish(); return; }
   }
+
+  // Prepare next trial: clear response area and disable keyboard while the sequence is shown
+  window.onkeydown = null;
+  $response.innerHTML = '';
+
   const nextSeq = genSequence(Math.min(length, PARAMS.MAX_LEN));
   showSequence(nextSeq, PARAMS.ISI_MS);
 }
@@ -275,7 +281,7 @@ function finishTask(){
     if (window.gorilla && typeof gorilla.metric === 'function'){
       gorilla.metric('summary', {
         rawScore: rawScore,
-        totalTrials: trialLog.length,
+        totalTrials: (trialLog || []).length,
         trialLog: trialLog
       });
     }
@@ -292,15 +298,12 @@ function finishTask(){
     }
   }catch(e){ /* ignore */ }
 
-  // --- Qualtrics / redirect integration ---
-  // Build a redirect URL that passes the key results as query parameters.
-  // Qualtrics can read these into Embedded Data fields.
+  // --- Redirect / Qualtrics integration ---
   try{
     const params = new URLSearchParams();
     params.set('pid', PID);
     params.set('rawScore', String(rawScore));
     params.set('totalTrials', String(trialLog ? trialLog.length : 0));
-    // Full trial log as JSON string (can be stored as a long text field in Qualtrics)
     if (trialLog){
       params.set('trialLog', JSON.stringify(trialLog));
     }
@@ -309,13 +312,24 @@ function finishTask(){
     const joiner = url.includes('?') ? '&' : '?';
     url = url + joiner + params.toString();
 
-    setTimeout(()=>{ window.location.href = url; }, 600);
+    // Notify parent page (e.g., Qualtrics) that the task is finished
+    try{
+      window.parent.postMessage('taskFinished', '*');
+    }catch(e){ /* ignore */ }
+
+    setTimeout(()=>{ window.location.href = url; }, 800);
   }catch(e){
-    // If something goes wrong with redirect building, just try the original minimal redirect
+    // Fallback: minimal redirect with pid only
     const url = REDIRECT_URL + (REDIRECT_URL.includes('?') ? '&' : '?') + 'pid=' + encodeURIComponent(PID);
-    setTimeout(()=>{ window.location.href = url; }, 600);
+
+    try{
+      window.parent.postMessage('taskFinished', '*');
+    }catch(e2){ /* ignore */ }
+
+    setTimeout(()=>{ window.location.href = url; }, 800);
   }
 }
+
 
 function startStage(){
   setUIByStage();
