@@ -272,9 +272,26 @@ function interstitialScreen(){
 }
 
 function finishTask(){
-  // Stop task & keyboard listening
+  // עצירת המטלה
   running = false;
   window.onkeydown = null;
+
+  // הודעת סיום קצרה
+  $screen.innerHTML = '<h3 role="heading" aria-level="2">סיום המטלה</h3><p>תודה על השתתפותך!</p>';
+  $response.innerHTML = '';
+
+  // שולחים את הנתונים לקוולטריקס (הדף ההורה של ה-iframe)
+  const payload = {
+    type: 'digitspan_finished',
+    pid: PID,
+    rawScore: rawScore,
+    totalTrials: (trialLog ? trialLog.length : 0),
+    trialLog: trialLog || []
+  };
+
+  try { window.parent.postMessage(payload, '*'); } catch(e) {}
+}
+
 
   // If running inside Gorilla, still send a summary metric (backwards-compatible)
   try{
