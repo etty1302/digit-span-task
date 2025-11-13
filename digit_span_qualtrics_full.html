@@ -19,6 +19,28 @@
       --notice-bg: #fff6e6; --notice-bd:#ffe0a6; --notice-tx:#8a5a00;
     }
     *{ box-sizing:border-box }
+ <script>
+(function(){
+  function qa(s, r){ return Array.from((r||document).querySelectorAll(s)); }
+  function startNow(){
+    var btn = document.getElementById('startPractice') ||
+              qa('button').find(b => /התחל|start/i.test((b.textContent||'').trim()));
+    if (btn) { try { btn.click(); return true; } catch(_) {} }
+    try { if (typeof safeStart === 'function') { safeStart(); return true; } } catch(_){}
+    try { if (typeof startStage === 'function') { window.stageIndex = 0; startStage('practice'); return true; } } catch(_){}
+    return false;
+  }
+
+  var params = new URLSearchParams(location.search||"");
+  if (params.get('autostart') === '1' || params.get('autostart') === 'true') {
+    window.addEventListener('load', function(){
+      // ניסיון מהיר, ואם לא – עוד ניסיון קצר אחרי בניית המסך
+      if (!startNow()) setTimeout(startNow, 100);
+    });
+  }
+})();
+</script>
+
     body{ margin:0; font-family:Arial,"Segoe UI",system-ui; background:linear-gradient(180deg,var(--bg), var(--bg-accent) 70%, var(--bg)); color:var(--text); }
     .wrap{ max-width:900px; margin:28px auto; padding:0 16px; }
     .card{ background:var(--card); border:1px solid var(--border); border-radius:20px; padding:24px; box-shadow:0 20px 50px rgba(16,42,67,.08); }
