@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<!-- saved from url=(0083)file:///D:/Etty%20Golan/Downloads/digit_span_digitspan_final_no_subtitle%20(3).html -->
+<html lang="he" dir="rtl"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Digit Span – קדימה ואז אחורה</title>
+  <style>
+    :root{
+      --bg1:#eef3ff;
+      --bg2:#f8fbff;
+      --ink:#0f2544;
+      --ink-soft:#5c6a86;
+      --brand:#2b59c3;
+      --brand-soft:#e0e8ff;
+      --accent:#00b894;
+      --card:#ffffff;
+      --line:#d8e3f7;
+      --muted:#94a3b8;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      background:
+        radial-gradient(900px 600px at 90% 0%, #e4edff 0%, transparent 60%),
+        radial-gradient(900px 600px at 0% 100%, #e8fff7 0%, transparent 60%),
+        linear-gradient(180deg,var(--bg1),var(--bg2));
+      color:var(--ink);
+      font: 18px/1.7 "Heebo","Segoe UI",Arial,sans-serif;
+      display:flex; align-items:center; justify-content:center;
+    }
+    .wrap{width:min(960px,96vw); margin:28px auto}
+    .card{
+      background:var(--card);
+      border-radius:26px;
+      border:1px solid var(--line);
+      box-shadow:0 18px 50px rgba(15,37,68,.12);
+      overflow:hidden;
+      backdrop-filter: blur(8px);
+    }
+    .header{
+      padding:20px 26px;
+      background:linear-gradient(120deg, rgba(43,89,195,.14), rgba(0,184,148,.10));
+      border-bottom:1px solid var(--line);
+      display:flex; align-items:center; justify-content:space-between; gap:16px;
+    }
+    .title{
+      margin:0;
+      font-weight:900;
+      letter-spacing:.4px;
+      font-size:22px;
+      color:#0b1933;
+    }
+    .subtitle{
+      margin:0;
+      font-size:14px;
+      color:var(--ink-soft);
+    }
+    .chips{display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end}
+    .chip{
+      background:var(--brand-soft);
+      color:var(--brand);
+      border-radius:999px;
+      padding:6px 12px;
+      font:600 13px/1 "Heebo";
+      border:1px solid rgba(43,89,195,.18);
+    }
+    .chip.alt{
+      background:#e6fcf5;
+      color:#038c63;
+      border-color:rgba(3,140,99,.26);
+    }
+    .chip.warn{
+      background:#fff2f2;
+      color:#b81f1f;
+      border-color:#ffd6d6;
+    }
+
+    #screen{
+      min-height:430px;
+      padding:30px 30px 26px;
+      display:grid;
+      place-items:center;
+      gap:22px;
+      position:relative;
+    }
+    .big{
+      font: clamp(60px, 8vw, 96px)/1.05 "Rubik","Heebo",system-ui;
+      letter-spacing:.08em;
+      color:var(--brand);
+      user-select:none;
+      text-shadow:0 4px 0 rgba(43,89,195,.10);
+      transition:transform .16s ease-out;
+    }
+    .row{
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:center;
+      margin-top:10px;
+    }
+    input[type=text]{
+      font: 30px/1 "Roboto Mono","Consolas",monospace;
+      letter-spacing:.08em;
+      text-align:center;
+      border:2px solid #cfe2ff;
+      border-radius:16px;
+      padding:16px 18px;
+      width:min(460px,84vw);
+      background:#ffffff;
+      transition: box-shadow .2s, border-color .2s, opacity .2s, transform .12s;
+    }
+    input[type=text]:focus{
+      outline:none;
+      border-color:#9cc0ff;
+      box-shadow:0 0 0 6px rgba(156,192,255,.25);
+      transform:translateY(-1px);
+    }
+    input[readonly]{
+      opacity:0;
+      pointer-events:none;
+    }
+    .btn{
+      appearance:none;
+      border:2px solid #cfe2ff;
+      background:#f4f7ff;
+      color:var(--brand);
+      padding:12px 20px;
+      border-radius:16px;
+      font-weight:800;
+      cursor:pointer;
+      box-shadow:0 8px 18px rgba(0,0,0,.06);
+      transition:transform .06s, box-shadow .06s, background .12s, border-color .12s;
+    }
+    .btn.primary{
+      background:var(--brand);
+      border-color:var(--brand);
+      color:#fff;
+    }
+    .btn.success{
+      background:var(--accent);
+      border-color:var(--accent);
+      color:#072c23;
+    }
+    .btn:active{
+      transform:translateY(1px);
+      box-shadow:0 4px 10px rgba(0,0,0,.06);
+    }
+    .btn:disabled{
+      opacity:.45;
+      cursor:not-allowed;
+      box-shadow:none;
+    }
+
+    .notice{
+      background:#fffbeb;
+      border:1px solid #ffe0a3;
+      color:#7a5d00;
+      border-radius:18px;
+      padding:16px 20px;
+      font-weight:600;
+      max-width:830px;
+      box-shadow:0 6px 18px rgba(122,93,0,.08);
+      font-size:18px;
+      line-height:1.9;
+    }
+    .notice b{
+      font-size:19px;
+    }
+    .big-note{
+      font-size:20px;
+      font-weight:900;
+      color:#b81f1f;
+      margin:8px 0;
+    }
+
+    .footer{
+      padding:16px 24px 18px;
+      border-top:1px solid var(--line);
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      color:var(--muted);
+      font-size:13px;
+    }
+    .stage-pill{
+      padding:6px 12px;
+      border-radius:999px;
+      background:#eef3ff;
+      border:1px solid #d6e3ff;
+      color:#23408b;
+      font-weight:600;
+    }
+    .fade-in{animation:fade .35s ease}
+    @keyframes fade{from{opacity:0; transform:translateY(6px)} to{opacity:1; transform:none}}
+  </style>
+</head>
+<body>
+  <div class="wrap card">
+    <div class="header">
+      <div>
+        <h1 class="title">Digit Span – מטלה משולבת</h1>
+        
+      </div>
+      <div class="chips">
+        <div class="chip">קדימה</div>
+        <div class="chip alt">אחורה</div>
+        <div class="chip warn">תרגול</div>
+      </div>
+    </div>
+
+    <div id="screen" class="fade-in">
+      <div class="center" style="display:grid; gap:20px; max-width:860px;">
+        <div class="notice">
+          <p><b>במטלה זו יוצגו בפניך ספרות בזו אחר זו.</b></p>
+          <p>תחילה תבצע/י ניסיון תרגול קצר (לא נחשב לציון) כדי להבין את הפעולה: לזכור את הספרות בסדר שבו הופיעו ולהקליד אותן באותו סדר.</p>
+          <p>לאחר מכן יחל החלק הראשון (קדימה), ולבסוף החלק השני (אחורה).</p>
+        </div>
+        <div class="row">
+          <button id="startBtn" class="btn primary">התחל תרגול</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <div id="progressLbl"></div>
+      <div id="stageLbl" class="stage-pill">מסך פתיחה</div>
+    </div>
+  </div>
+
+<script>
+(function(){
+  // ===== URL params =====
+  const P = new URLSearchParams(location.search||"");
+  const PID = P.get('pid') || 'NA';
+  const REDIRECT = P.get('redirect') || null;
+
+  // ===== HARD RESET very early =====
+  if (P.get('reset') === '1' && !P.get('_b')) {
+    try { localStorage.clear(); } catch(e){}
+    try {
+      document.cookie.split(';').forEach(c=>{
+        document.cookie = c.split('=')[0].trim() + '=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/';
+      });
+    } catch(e){}
+    P.set('_b', String(Date.now()));
+    location.replace(location.pathname + '?' + P.toString() + location.hash);
+  }
+
+  // ===== Config =====
+  const CFG = {
+    forward:  { spanMin: 2, spanMax: 9, trialsPerSpan: 2, isi: 500, digitOn: 1000 },
+    backward: { spanMin: 2, spanMax: 8, trialsPerSpan: 2, isi: 500, digitOn: 1000 },
+    practiceForward: { length: 2 },
+    practiceBackward:{ length: 2 }
+  };
+
+  // ===== State =====
+  let stage = 'intro';
+  let span = CFG.forward.spanMin;
+  let trialInSpan = 1;
+  let failsAtSpan = 0;
+  let running = false;
+  let rawScore = 0;
+  let attempts = 0;
+  let log = [];
+
+  // ===== Elements =====
+  const $  = (s,r)=> (r||document).querySelector(s);
+  const $$ = (s,r)=> Array.from((r||document).querySelectorAll(s));
+  const screen      = $('#screen');
+  const progressLbl = $('#progressLbl');
+  const stageLbl    = $('#stageLbl');
+
+  // ===== Helpers =====
+  const sleep       = ms => new Promise(res=>setTimeout(res,ms));
+  const rng         = (min,max)=> Math.floor(Math.random()*(max-min+1))+min;
+  const randDigits  = n => Array.from({length:n}, ()=> String(rng(0,9))).join('');
+
+  function hideInput(inp){
+    if (!inp) return;
+    inp.value = '';
+    inp.setAttribute('readonly','readonly');
+    inp.style.opacity='0';
+    inp.style.pointerEvents='none';
+  }
+  function showInput(inp){
+    if (!inp) return;
+    inp.removeAttribute('readonly');
+    inp.style.opacity='';
+    inp.style.pointerEvents='';
+    inp.focus(); inp.select && inp.select();
+  }
+  function setTop(stageText, subText){
+    stageLbl.textContent = stageText || '';
+    progressLbl.textContent = subText || '';
+  }
+
+  // ===== Intro screen =====
+  function intro(){
+    setTop('מסך פתיחה','');
+    screen.innerHTML = `
+      <div class="center" style="display:grid; gap:20px; max-width:860px;">
+        <div class="notice">
+          <p><b>במטלה זו יוצגו בפניך ספרות בזו אחר זו.</b></p>
+          <p>תחילה תבצע/י ניסיון תרגול קצר (לא נחשב לציון) כדי להבין את הפעולה: לזכור את הספרות בסדר שבו הופיעו ולהקליד אותן באותו סדר.</p>
+          <p>לאחר מכן יחל החלק הראשון (קדימה), ולבסוף החלק השני (אחורה).</p>
+        </div>
+        <div class="row">
+          <button id="startBtn" class="btn primary">התחל תרגול</button>
+        </div>
+      </div>
+    `;
+    $('#startBtn').addEventListener('click', ()=>{ stage='practiceForward'; step(); }, {once:true});
+  }
+
+  // ===== Core trial runner =====
+  async function runTrial(mode, n, timing, isPractice){
+    screen.innerHTML = '';
+
+    const big = document.createElement('div');
+    big.className = 'big';
+    screen.appendChild(big);
+
+    const row = document.createElement('div');
+    row.className='row';
+    const inp = document.createElement('input');
+    inp.type='text'; inp.inputMode='numeric'; inp.autocomplete='off';
+    row.appendChild(inp);
+    const okBtn = document.createElement('button');
+    okBtn.className='btn primary';
+    okBtn.textContent='אישור';
+    row.appendChild(okBtn);
+    screen.appendChild(row);
+
+    hideInput(inp);
+    okBtn.disabled = true;
+
+    const seq = randDigits(n);
+    for (let ch of seq){
+      big.textContent = ch;
+      await sleep(timing.digitOn);
+      big.textContent = ' ';
+      await sleep(timing.isi);
+    }
+    big.textContent = '';
+    showInput(inp);
+    okBtn.disabled = false;
+
+    let resolveTrial; 
+    const done = new Promise(res=> resolveTrial = res);
+
+    const submit = ()=>{
+      const resp = (inp.value||'').trim();
+      hideInput(inp);
+      okBtn.disabled = true;
+      const target = (mode==='backward') ? seq.split('').reverse().join('') : seq;
+      const correct = resp === target;
+
+      if (!isPractice){
+        rawScore += correct ? 1 : 0;
+        attempts += 1;
+        log.push({mode, span:n, trial:trialInSpan, seq, target, resp, correct, pid:PID, t:Date.now()});
+      }
+      resolveTrial(correct);
+    };
+    okBtn.addEventListener('click', submit);
+    inp.addEventListener('keydown', e=>{ if (e.key==='Enter'){ e.preventDefault(); submit(); } });
+
+    return await done;
+  }
+
+  // ===== Sections =====
+  async function doPracticeForward(){
+    setTop('תרגול קדימה','ניסיון קצר אחד בלבד');
+    await runTrial('forward', CFG.practiceForward.length, {digitOn:700, isi:150}, true);
+    stage       = 'introForwardReal';
+  }
+
+  function introForwardReal(){
+    setTop('חלק קדימה','');
+    screen.innerHTML = `
+      <div class="center" style="display:grid; gap:20px; max-width:860px;">
+        <div class="notice">
+          <p><b>כעת מתחילה המטלה עצמה – חלק "קדימה".</b></p>
+          <p>יוצגו בפניך סדרות של ספרות. בכל פעם עליך לזכור את הספרות ולהקליד אותן <u>באותו סדר</u> שבו הופיעו.</p>
+          <p>הסדרות יתחילו מאורך של 2 ספרות, ולאחר שני ניסיונות באותו אורך האורך עשוי לגדול בהתאם לביצוע.</p>
+        </div>
+        <div class="row">
+          <button id="startForwardReal" class="btn primary">התחל חלק קדימה</button>
+        </div>
+      </div>
+    `;
+    $('#startForwardReal').addEventListener('click', ()=>{
+      span        = CFG.forward.spanMin;
+      trialInSpan = 1;
+      failsAtSpan = 0;
+      stage       = 'forward';
+      step();
+    }, {once:true});
+  }
+
+  async function doForward(){
+    setTop('קדימה','');
+    const ok = await runTrial('forward', span, {digitOn: CFG.forward.digitOn, isi: CFG.forward.isi}, false);
+    if (!ok) failsAtSpan++;
+
+    if (trialInSpan < CFG.forward.trialsPerSpan){
+      trialInSpan++;
+    } else {
+      if (failsAtSpan >= CFG.forward.trialsPerSpan){
+        stage       = 'introBackward';
+        span        = CFG.backward.spanMin;
+        trialInSpan = 1;
+        failsAtSpan = 0;
+        return;
+      } else {
+        span        = Math.min(span+1, CFG.forward.spanMax);
+        trialInSpan = 1;
+        failsAtSpan = 0;
+      }
+    }
+
+    if (span > CFG.forward.spanMax){
+      stage       = 'introBackward';
+      span        = CFG.backward.spanMin;
+      trialInSpan = 1;
+      failsAtSpan = 0;
+    }
+  }
+
+  function introBackward(){
+    setTop('הסבר לחלק "אחורה"','');
+    screen.innerHTML = `
+      <div class="center" style="display:grid; gap:20px; max-width:860px;">
+        <div class="notice">
+          <p><b>כעת נמשיך לחלק השני של המטלה – חלק "אחורה".</b></p>
+          <p class="big-note">בשלב זה עליך להקליד את הספרות <u>בסדר הפוך</u> לסדר שבו הופיעו – להתחיל מהספרה האחרונה שהוצגה ולהמשיך אחורה עד הראשונה.</p>
+          <p>גם כאן יוצגו בפניך ספרות בזו אחר זו. תחילה יתבצע ניסיון תרגול קצר (לא נכלל בציון), ולאחר מכן יחל החלק הרשמי של חלק "אחורה".</p>
+        </div>
+        <div class="row">
+          <button id="startBackPractice" class="btn success">התחל תרגול אחורה</button>
+        </div>
+      </div>
+    `;
+    $('#startBackPractice').addEventListener('click', ()=>{
+      stage = 'practiceBackward';
+      step();
+    }, {once:true});
+  }
+
+  async function doPracticeBackward(){
+    setTop('תרגול אחורה','ניסיון קצר אחד בלבד');
+    await runTrial('backward', CFG.practiceBackward.length, {digitOn:700, isi:150}, true);
+    span        = CFG.backward.spanMin;
+    trialInSpan = 1;
+    failsAtSpan = 0;
+    stage       = 'backward';
+  }
+
+  async function doBackward(){
+    setTop('אחורה','');
+    const ok = await runTrial('backward', span, {digitOn: CFG.backward.digitOn, isi: CFG.backward.isi}, false);
+    if (!ok) failsAtSpan++;
+
+    if (trialInSpan < CFG.backward.trialsPerSpan){
+      trialInSpan++;
+    } else {
+      if (failsAtSpan >= CFG.backward.trialsPerSpan){
+        stage = 'end';
+        return;
+      } else {
+        span        = Math.min(span+1, CFG.backward.spanMax);
+        trialInSpan = 1;
+        failsAtSpan = 0;
+      }
+    }
+
+    if (span > CFG.backward.spanMax){
+      stage = 'end';
+    }
+  }
+
+  function finish(){
+    setTop('סיום','');
+    screen.innerHTML = `<div class="center" style="display:grid; gap:12px">
+      <p>תודה! סיימת את המטלה.</p>
+      <p class="small">תוכלי לסגור חלון זה או להמשיך לשאלון.</p>
+      ${REDIRECT ? `<a class="btn primary" href="${REDIRECT}">חזרה לשאלון</a>` : ``}
+    </div>`;
+
+    try {
+      window.parent.postMessage({
+        type: 'digitspan_finished',
+        pid: PID,
+        rawScore,
+        totalTrials: attempts,
+        trialLog: log
+      }, '*');
+    } catch(_) {}
+  }
+
+  async function step(){
+    if (!running) running = true;
+    if (stage==='intro')             { intro(); return; }
+    if (stage==='practiceForward')   { await doPracticeForward(); }
+    else if (stage==='introForwardReal'){ introForwardReal(); return; }
+    else if (stage==='forward')      { await doForward(); }
+    else if (stage==='introBackward'){ introBackward(); return; }
+    else if (stage==='practiceBackward'){ await doPracticeBackward(); }
+    else if (stage==='backward')     { await doBackward(); }
+    else if (stage==='end')          { finish(); return; }
+    step();
+  }
+
+  window.addEventListener('load', function(){
+    stage='intro'; step();
+    if (P.get('autostart')==='1' || P.get('autostart')==='true'){
+      setTimeout(()=>{
+        if (stage==='intro'){ stage='practiceForward'; step(); }
+      }, 900);
+    }
+  });
+})();</script>
+
+
+</body></html>
