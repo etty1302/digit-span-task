@@ -47,6 +47,31 @@
     .inst-big.alt{ background:#eafff9; border-color:#ccf7ee; color:#06473f }
   </style>
 </head>
+ <!-- HARD RESET: runs before anything else -->
+<script>
+(function () {
+  var p = new URLSearchParams(location.search || "");
+  if (p.get('reset') === '1') {
+    try { localStorage.clear(); } catch(e) {}
+    try { sessionStorage.clear(); } catch(e) {}
+
+    // מחיקת קבצי cookie במידת הצורך (best-effort)
+    try {
+      document.cookie.split(';').forEach(function(c){
+        document.cookie = c.split('=')[0].trim() + '=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/';
+      });
+    } catch(e){}
+
+    // מניעת שחזור ממטמון/ServiceWorker – ריענון חד־פעמי עם "בוסטר" לשורת הכתובת
+    if (!p.get('_b')) {
+      p.set('_b', Date.now());
+      var u = location.pathname + '?' + p.toString() + location.hash;
+      location.replace(u);   // חוזר לדף באותו reset אבל אחרי ניקוי מוחלט
+    }
+  }
+})();
+</script>
+
   <script>
 (function () {
   function $(sel, root) { return (root || document).querySelector(sel); }
