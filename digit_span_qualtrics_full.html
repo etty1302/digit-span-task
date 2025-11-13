@@ -110,6 +110,125 @@
   });
 })();
 </script>
+<script>
+(function(){
+  // ======= Reset מלא בתחילת הדף (כשמבקשים) =======
+  const params = new URLSearchParams(location.search);
+  if (params.get('reset') === '1') {
+    try { localStorage.clear(); } catch(_) {}
+    try { sessionStorage.clear(); } catch(_) {}
+    // מאפס משתנים גלובליים אם קיימים
+    try { window.stageIndex = 0; } catch(_) {}
+    try { window.length = 0; } catch(_) {}
+    try { window.attemptsUsed = 0; } catch(_) {}
+    try { window.rawScore = 0; } catch(_) {}
+    try { window.trialLog = []; } catch(_) {}
+  }
+
+  // ======= עוזרים קצרים =======
+  const qa = (s, r) => Array.from((r||document).querySelectorAll(s));
+  const q  = (s, r) => (r||document).querySelector(s);
+  const visible = el => el && el.offsetParent !== null;
+
+  // שדות תשובה (טקסט/מספר/טקסט־אזור)
+  const inputSel = '#screen input[type="text"], #screen input[type="number"], #screen textarea';
+
+  // מנקה ומסתיר את השדות
+  function clearResponse() {
+    qa(inputSel).forEach(el=>{
+      el.value = '';
+      el.blur();
+      el.readOnly = true;
+      el.classList.add('ds-hidden');
+      el.style.opacity = '0';
+      el.style.pointerEvents = 'none';
+    });
+  }
+
+  // מציג ומפעיל את השדות כשמגיע שלב ההקלדה
+  function enableResponse() {
+    qa(inputSel).forEach(el=>{
+      el.readOnly = false;
+      el.classList.remove('ds-hidden');
+      el.style.opacity = '';
+      el.style.pointerEvents = '';
+      try { el.focus(); el.select && el.select(); } catch(_) {}
+    });
+  }
+
+  // לוחצים על "אישור/המשך" → ניקוי מיידי
+  function bindSubmitClear() {
+    document.addEventListener('keydown', e=>{
+      if (e.key === 'Enter') clearResponse();
+    }, true);
+    document.addEventListener('click', e=>{
+      if (e.target && e.target.closest &&
+          e.target.closest('#screen .btn.primary, #screen button.primary, #screen button[type="submit"]')) {
+        clearResponse();
+      }
+    }, true);
+  }
+
+  // מזהה "מסכי הצגה": אלמנט גלוי שמכיל כמעט רק ספרות (לא שדה קלט)
+  function showingDigitsNow() {
+    // כל אלמנט גלוי שמכיל שרשרת ספרות (לא input/textarea)
+    const nodes = qa('#screen *').filter(visible).filter(el=>{
+      if (/^(INPUT|TEXTAREA|BUTTON)$/i.test(el.tagName)) return false;
+      const t = (el.textContent||'').trim();
+      // לפחות 2 ספרות ובהתאם לרוב ספרות/רווחים
+      return t.length >= 2 && /^[\d\s]+$/.test(t);
+    });
+    return nodes.length > 0;
+  }
+
+  // "שומר מסך": כל 80ms מחליט מצב — הצגה או הקלדה
+  function watchdog() {
+    try {
+      if (showingDigitsNow()) {
+        clearResponse();             // בזמן הצגה — מסתיר ומאפס
+      } else {
+        // אם יש שדה גלוי → מאפשר הקלדה
+        const inputVisible = qa(inputSel).some(visible);
+        if (inputVisible) enableResponse();
+      }
+    } catch(_) {}
+  }
+
+  function startIfAsked() {
+    if (params.get('autostart') === '1' || params.get('autostart') === 'true') {
+      // קודם ננסה ללחוץ על כפתור "התחל"
+      const startBtn = document.getElementById('startPractice') ||
+                       qa('button').find(b => /התחל|start/i.test(b.textContent||''));
+      if (startBtn) { try { startBtn.click(); } catch(_) {} }
+      // ואם אין — ננסה להפעיל פונקציות פנימיות
+      setTimeout(function(){
+        try {
+          if (typeof safeStart === 'function') { safeStart(); return; }
+        } catch(_){}
+        try {
+          if (typeof startStage === 'function') { window.stageIndex=0; startStage('practice'); return; }
+        } catch(_){}
+      }, 80);
+    }
+  }
+
+  window.addEventListener('load', function(){
+    bindSubmitClear();
+    startIfAsked();
+
+    // משמר רץ — יתפוס גם מקרים שלא מצאנו מאזינים קיימים
+    setInterval(watchdog, 80);
+
+    // בנוסף: מאזין לשינויים ב-#screen ומפעיל enable/clear לפי מצב
+    const screen = q('#screen') || document.body;
+    new MutationObserver(()=>watchdog()).observe(screen, {childList:true,subtree:true});
+  });
+})();
+</script>
+<style>
+/* לוודא שהסתרה באמת לא נראית */
+.ds-hidden { opacity:0 !important; pointer-events:none !important; }
+</style>
 
 <body>
   <div class="wrap">
