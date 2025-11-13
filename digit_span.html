@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <title>מטלת Digit Span</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --bg1: #eef3ff;
+      --bg2: #e8f0ff;
+      --ink: #0f2544;
+      --accent: #0b8b94;
+      --accent-soft: #bae6ec;
+      --card: #ffffff;
+      --danger: #d9534f;
+      --muted: #6b7280;
+      --shadow: 0 20px 50px rgba(9, 25, 66, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      background: linear-gradient(135deg, var(--bg1), var(--bg2));
+      color: var(--ink);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 12px;
+    }
+
+    .wrap {
+      width: 100%;
+      max-width: 640px;
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: 20px;
+      box-shadow: var(--shadow);
+      padding: 28px 24px 24px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .badge {
+      display: inline-block;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 13px;
+      margin-bottom: 6px;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 24px;
+    }
+
+    .subtitle {
+      margin: 0 0 16px;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.45;
+    }
+
+    .highlight {
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    .highlight-strong {
+      font-weight: 900;
+      color: var(--accent);
+      font-size: 18px;
+      text-decoration: underline;
+    }
+
+    .section-title {
+      margin: 18px 0 6px;
+      font-weight: 700;
+      font-size: 16px;
+    }
+
+    .digits-display {
+      margin: 28px auto 16px;
+      min-height: 56px;
+      font-size: 40px;
+      letter-spacing: 12px;
+      text-align: center;
+      font-weight: 700;
+    }
+
+    .digits-display span {
+      display: inline-block;
+      min-width: 24px;
+    }
+
+    .response-area {
+      margin-top: 8px;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .response-area input {
+      flex: 1;
+      max-width: 220px;
+      padding: 8px 10px;
+      font-size: 20px;
+      text-align: center;
+      border-radius: 10px;
+      border: 1px solid #cbd5e1;
+      outline: none;
+      direction: ltr;
+    }
+
+    .response-area input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px rgba(11, 139, 148, 0.15);
+    }
+
+    .btn {
+      border-radius: 999px;
+      border: none;
+      padding: 8px 18px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.06s ease, box-shadow 0.06s ease, background 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #ffffff;
+      box-shadow: 0 10px 30px rgba(11, 139, 148, 0.4);
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: #0a7581;
+      transform: translateY(-1px);
+      box-shadow: 0 14px 36px rgba(11, 139, 148, 0.5);
+    }
+
+    .btn-primary:active:not(:disabled) {
+      transform: translateY(0);
+      box-shadow: 0 8px 22px rgba(11, 139, 148, 0.35);
+    }
+
+    .btn-secondary {
+      background: #e5e7eb;
+      color: #111827;
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      background: #d1d5db;
+    }
+
+    .btn:disabled {
+      opacity: 0.7;
+      cursor: default;
+      box-shadow: none;
+      transform: none;
+    }
+
+    .footer-text {
+      margin-top: 18px;
+      font-size: 13px;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .phase-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 13px;
+      background: #eff6ff;
+      color: #1d4ed8;
+      margin-top: 4px;
+    }
+
+    .phase-tag span {
+      font-weight: 700;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    @media (max-width: 480px) {
+      .card {
+        padding: 22px 18px 18px;
+      }
+      .digits-display {
+        font-size: 32px;
+        letter-spacing: 8px;
+      }
+      h1 {
+        font-size: 20px;
+      }
+      .section-title {
+        font-size: 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <div id="badge" class="badge">מטלת זיכרון ספרות</div>
+      <h1 id="title">ברוכה הבאה</h1>
+      <p id="subtitle" class="subtitle"></p>
+
+      <div id="phaseTag" class="phase-tag hidden">
+        מצב נוכחי: <span id="phaseLabel"></span>
+      </div>
+
+      <div id="contentArea">
+        <!-- התוכן הדינמי נכנס לכאן -->
+      </div>
+
+      <div id="digitsArea" class="digits-display"></div>
+
+      <div id="responseArea" class="response-area hidden">
+        <input
+          id="responseInput"
+          type="text"
+          inputmode="numeric"
+          autocomplete="off"
+          placeholder="הקליד/י כאן את הספרות"
+        />
+        <button id="submitBtn" class="btn btn-primary">אישור</button>
+      </div>
+
+      <div id="buttonsArea" style="margin-top:18px; display:flex; justify-content:center; gap:8px;">
+        <button id="continueBtn" class="btn btn-primary">המשך</button>
+      </div>
+
+      <div id="footer" class="footer-text">
+        השתדלי להתרכז. אין צורך למהר – חשוב לענות לפי ההוראות.
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /**********************
+     * פרמטרים של המטלה
+     **********************/
+    const TRIALS_PER_SPAN = 2;
+
+    const forwardConfig = {
+      name: "קדימה",
+      minSpan: 2,
+      maxSpan: 9
+    };
+
+    const backwardConfig = {
+      name: "אחורה",
+      minSpan: 2,
+      maxSpan: 8
+    };
+
+    /**********************
+     * אלמנטים מה-DOM
+     **********************/
+    const titleEl = document.getElementById("title");
+    const subtitleEl = document.getElementById("subtitle");
+    const badgeEl = document.getElementById("badge");
+    const contentArea = document.getElementById("contentArea");
+    const digitsArea = document.getElementById("digitsArea");
+    const responseArea = document.getElementById("responseArea");
+    const responseInput = document.getElementById("responseInput");
+    const submitBtn = document.getElementById("submitBtn");
+    const continueBtn = document.getElementById("continueBtn");
+    const footerEl = document.getElementById("footer");
+    const phaseTag = document.getElementById("phaseTag");
+    const phaseLabel = document.getElementById("phaseLabel");
+
+    /**********************
+     * משתני מצב
+     **********************/
+    let phase = "intro-forward";   // intro-forward, practice-forward, task-forward, break, intro-backward, practice-backward, task-backward, end
+    let direction = "forward";     // "forward" או "backward"
+    let currentSpan = 2;
+    let trialInSpan = 0;           // 0 או 1
+    let errorsInSpan = 0;
+    let correctInSpan = 0;
+    let isShowingDigits = false;
+    let currentSequence = [];
+    let revealTimeout = null;
+
+    /**********************
+     * פונקציות עזר
+     **********************/
+    function setPhaseTag(text) {
+      if (!text) {
+        phaseTag.classList.add("hidden");
+        return;
+      }
+      phaseTag.classList.remove("hidden");
+      phaseLabel.textContent = text;
+    }
+
+    function showDigits(seq) {
+      isShowingDigits = true;
+      digitsArea.textContent = "";
+      responseArea.classList.add("hidden");
+      responseInput.value = "";
+      responseInput.disabled = true;
+      submitBtn.disabled = true;
+
+      let index = 0;
+      const interval = 1000; // מ&quot;ש לכל ספרה
+
+      function showNext() {
+        if (index >= seq.length) {
+          // סיימנו להציג, מחכים רגע ואז מאפשרים הקלדה
+          setTimeout(() => {
+            digitsArea.textContent = "";
+            isShowingDigits = false;
+            responseArea.classList.remove("hidden");
+            responseInput.disabled = false;
+            submitBtn.disabled = false;
+            responseInput.focus();
+          }, 400);
+          return;
+        }
+
+        digitsArea.innerHTML = "<span>" + seq[index] + "</span>";
+        index++;
+        revealTimeout = setTimeout(showNext, interval);
+      }
+
+      showNext();
+    }
+
+    function makeRandomSequence(len) {
+      const seq = [];
+      for (let i = 0; i < len; i++) {
+        // ספרות 0-9
+        const d = Math.floor(Math.random() * 10);
+        seq.push(d.toString());
+      }
+      return seq;
+    }
+
+    function normalizeAnswer(str) {
+      return (str || "")
+        .trim()
+        .replace(/\s+/g, "")
+        .replace(/[^0-9]/g, "");
+    }
+
+    function getCorrectString(seq, dir) {
+      if (dir === "forward") {
+        return seq.join("");
+      }
+      // backward
+      return seq.slice().reverse().join("");
+    }
+
+    function resetSpanCounters() {
+      trialInSpan = 0;
+      errorsInSpan = 0;
+      correctInSpan = 0;
+    }
+
+    function disableAllButtons() {
+      continueBtn.disabled = true;
+      submitBtn.disabled = true;
+    }
+
+    function enableAllButtons() {
+      continueBtn.disabled = false;
+      submitBtn.disabled = false;
+    }
+
+    /**********************
+     * מסכי טקסט
+     **********************/
+    function renderIntroForward() {
+      direction = "forward";
+      phase = "intro-forward";
+      setPhaseTag("הסבר כללי + תרגול ראשון");
+      badgeEl.textContent = "מטלת זיכרון ספרות";
+      titleEl.textContent = "הוראות המטלה";
+      subtitleEl.innerHTML =
+        "בכל שלב תופיע לפנייך סדרת ספרות, ספרה אחת בכל פעם. " +
+        "המטרה היא לזכור את הספרות לפי ההוראות ולהקליד אותן אחר כך.";
+      contentArea.innerHTML = `
+        <p>
+          <span class="section-title">מה תעשי עכשיו?</span><br/>
+          במטלה זו יוצגו בפנייך ספרות בזו אחר זו על גבי המסך.
+          לאחר הצגת הסדרה תתבקשי <span class="highlight">להקליד את הספרות</span> בשורת ההקלדה וללחוץ על כפתור
+          <span class="highlight">"אישור"</span>.
+        </p>
+        <p>
+          תחילה תבצעי <span class="highlight">ניסיון תרגול קצר</span> (לא נחשב לציון) כדי להבין את מהלך המטלה.
+          לאחר מכן יתחיל <span class="highlight-strong">החלק הראשון – קדימה</span>:
+          עלייך להקליד את הספרות
+          <span class="highlight">באותו סדר שבו הופיעו</span>.
+        </p>
+        <p>
+          בהמשך, אחרי הפסקה קצרה, יתחיל <span class="highlight-strong">החלק השני – אחורה</span>,
+          שבו תתבקשי להקליד את הספרות <span class="highlight">בסדר הפוך</span>.
+        </p>
+      `;
+      digitsArea.textContent = "";
+      responseArea.classList.add("hidden");
+      footerEl.textContent = "אם משהו לא ברור כעת – אל דאגה, מיד יהיה תרגול קצר.";
+      continueBtn.textContent = "התחל/י תרגול קדימה";
+      continueBtn.classList.remove("hidden");
+      continueBtn.onclick = startForwardPractice;
+      submitBtn.classList.add("hidden"); // מוצג רק בזמן ניסוי
+    }
+
+    function renderIntroBackward() {
+      direction = "backward";
+      phase = "intro-backward";
+      setPhaseTag("הסבר לחלק אחורה + תרגול קצר");
+      badgeEl.textContent = "חלק ב׳ – ספרות אחורה";
+      titleEl.textContent = "הוראות לחלק אחורה";
+      subtitleEl.innerHTML =
+        "<span class='highlight-strong'>בחלק זה יש לשנות את כיוון הזיכרון.</span>";
+
+      contentArea.innerHTML = `
+        <p style="font-size:16px; line-height:1.6;">
+          כעת מתחיל <span class="highlight-strong">החלק השני של המטלה – "אחורה"</span>.<br/>
+          שוב יוצגו בפנייך ספרות בזו אחר זו, אך כעת עלייך לזכור אותן
+          <span class="highlight">ולהקליד אותן בסדר הפוך</span>.
+        </p>
+        <p>
+          לדוגמה: אם הוצגו הספרות <span class="highlight">3-7-1</span>,
+          יש להקליד <span class="highlight">1-7-3</span>.
+        </p>
+        <p>
+          מיד יופיע <span class="highlight">תרגול קצר</span> כדי לוודא שההוראה ברורה,
+          ולאחר מכן תתחיל המשימה עצמה בחלק "אחורה".
+        </p>
+      `;
+      digitsArea.textContent = "";
+      responseArea.classList.add("hidden");
+      footerEl.textContent = "נסי לשים לב במיוחד לכיוון – כאן תמיד נקליד מהסוף להתחלה.";
+      continueBtn.textContent = "התחל/י תרגול אחורה";
+      continueBtn.classList.remove("hidden");
+      continueBtn.onclick = startBackwardPractice;
+    }
+
+    function renderBreakScreen() {
+      phase = "break";
+      setPhaseTag("הפסקה קצרה");
+      badgeEl.textContent = "הפסקה קצרה";
+      titleEl.textContent = "סיום חלק קדימה";
+      subtitleEl.textContent = "";
+      contentArea.innerHTML = `
+        <p>
+          סיימת את <span class="highlight">החלק הראשון – קדימה</span>.
+        </p>
+        <p>
+          כעת נצא להפסקה ממש קצרה, ולאחר מכן נעבור לחלק
+          <span class="highlight-strong">"אחורה"</span>, שבו יש להקליד את הספרות בסדר הפוך.
+        </p>
+      `;
+      digitsArea.textContent = "";
+      responseArea.classList.add("hidden");
+      footerEl.textContent = "כשאת מוכנה, לחצי על 'המשך' כדי לעבור להסבר על חלק אחורה.";
+      continueBtn.textContent = "המשך לחלק אחורה";
+      continueBtn.classList.remove("hidden");
+      continueBtn.onclick = renderIntroBackward;
+    }
+
+    function renderEndScreen() {
+      phase = "end";
+      setPhaseTag("המטלה הסתיימה");
+      badgeEl.textContent = "תודה רבה";
+      titleEl.textContent = "סיום המטלה";
+      subtitleEl.textContent = "";
+      contentArea.innerHTML = `
+        <p>
+          סיימת את שני חלקי מטלת ה-Digit Span – קדימה ואחורה.
+        </p>
+        <p>
+          תודה רבה על ההשתתפות! ניתן לסגור כעת את החלון.
+        </p>
+      `;
+      digitsArea.textContent = "";
+      responseArea.classList.add("hidden");
+      footerEl.textContent = "";
+      continueBtn.classList.add("hidden");
+    }
+
+    /**********************
+     * תרגול קדימה
+     **********************/
+    function startForwardPractice() {
+      phase = "practice-forward";
+      direction = "forward";
+      setPhaseTag("תרגול – קדימה");
+      badgeEl.textContent = "תרגול קדימה";
+      titleEl.textContent = "תרגול קצר – קדימה";
+      subtitleEl.textContent = "";
+      contentArea.innerHTML = `
+        <p>
+          בתרגול זה תופיע <span class="highlight">סדרת ספרות אחת בלבד</span> באורך שתי ספרות.
+          לאחר ההצגה הקליד/י את הספרות <span class="highlight">באותו סדר</span> שבו הופיעו ולחצי על
+          <span class="highlight">"אישור"</span>.
+        </p>
+      `;
+      footerEl.textContent = "התרגול אינו נחשב לציון – הוא רק לווידוא הבנת ההוראה.";
+      continueBtn.textContent = "התחל/י תרגול";
+      continueBtn.onclick = () => runPracticeTrial("forward");
+      continueBtn.classList.remove("hidden");
+      responseArea.classList.add("hidden");
+      submitBtn.classList.remove("hidden");
+    }
+
+    function runPracticeTrial(dir) {
+      disableAllButtons();
+      digitsArea.textContent = "";
+      contentArea.innerHTML += `<p style="margin-top:8px; color:var(--muted);">שימי לב לספרות המוצגות...</p>`;
+
+      const seq = makeRandomSequence(2); // תרגול באורך 2 ספרות
+      currentSequence = seq;
+      direction = dir;
+
+      showDigits(seq);
+
+      // אחרי שהתשובה נשלחת – מסך "התרגול הסתיים"
+      submitBtn.onclick = () => {
+        if (isShowingDigits) return;
+        const ans = normalizeAnswer(responseInput.value);
+        if (!ans) {
+          responseInput.focus();
+          return;
+        }
+        disableAllButtons();
+        responseArea.classList.add("hidden");
+        digitsArea.textContent = "";
+        contentArea.innerHTML = `
+          <p>
+            תודה, התרגול הסתיים.
+          </p>
+          <p>
+            כעת תתחיל <span class="highlight-strong">המשימה האמיתית</span>
+            בחלק <span class="highlight">"${dir === "forward" ? "קדימה" : "אחורה"}"</span>.
+          </p>
+        `;
+        footerEl.textContent = "";
+        continueBtn.classList.remove("hidden");
+        continueBtn.textContent =
+          dir === "forward" ? "התחל/י משימת קדימה" : "התחל/י משימת אחורה";
+        continueBtn.onclick =
+          dir === "forward" ? startForwardTask : startBackwardTask;
+        enableAllButtons();
+      };
+
+      enableAllButtons();
+    }
+
+    /**********************
+     * תרגול אחורה
+     **********************/
+    function startBackwardPractice() {
+      phase = "practice-backward";
+      direction = "backward";
+      setPhaseTag("תרגול – אחורה");
+      badgeEl.textContent = "תרגול אחורה";
+      titleEl.textContent = "תרגול קצר – אחורה";
+      subtitleEl.textContent = "";
+      contentArea.innerHTML = `
+        <p>
+          בתרגול זה תופיע <span class="highlight">סדרת ספרות אחת בלבד</span> באורך שתי ספרות.
+          לאחר ההצגה עלייך להקליד את הספרות
+          <span class="highlight">בסדר הפוך</span> וללחוץ על
+          <span class="highlight">"אישור"</span>.
+        </p>
+        <p>
+          לדוגמה: אם הופיעו <span class="highlight">4-9</span>, יש להקליד <span class="highlight">9-4</span>.
+        </p>
+      `;
+      footerEl.textContent = "גם כאן – התרגול אינו נחשב לציון אלא לווידוא הבנת ההוראה.";
+      continueBtn.textContent = "התחל/י תרגול";
+      continueBtn.onclick = () => runPracticeTrial("backward");
+      continueBtn.classList.remove("hidden");
+      responseArea.classList.add("hidden");
+      submitBtn.classList.remove("hidden");
+    }
+
+    /**********************
+     * משימת קדימה
+     **********************/
+    function startForwardTask() {
+      phase = "task-forward";
+      direction = "forward";
+      setPhaseTag("משימה – קדימה");
+      badgeEl.textContent = "חלק א׳ – ספרות קדימה";
+      titleEl.textContent = "משימת קדימה";
+      subtitleEl.textContent =
+        "הקליד/י בכל פעם את הספרות בסדר שבו הופיעו על המסך.";
+      contentArea.innerHTML = `
+        <p>
+          המשימה כעת מתחילה. בכל שלב תופיע סדרת ספרות,
+          ולאחר מכן תתבקשי להקליד אותן <span class="highlight">באותו סדר</span>.
+        </p>
+      `;
+      footerEl.textContent = "נסי לזכור את הספרות ברצף. אם אינך בטוחה – עני כמיטב יכולתך.";
+      continueBtn.classList.add("hidden");
+      submitBtn.classList.remove("hidden");
+      responseArea.classList.add("hidden");
+
+      currentSpan = forwardConfig.minSpan;
+      resetSpanCounters();
+      scheduleNextTrial();
+    }
+
+    /**********************
+     * משימת אחורה
+     **********************/
+    function startBackwardTask() {
+      phase = "task-backward";
+      direction = "backward";
+      setPhaseTag("משימה – אחורה");
+      badgeEl.textContent = "חלק ב׳ – ספרות אחורה";
+      titleEl.textContent = "משימת אחורה";
+      subtitleEl.innerHTML =
+        "<span class='highlight-strong'>בחלק זה תמיד מקלידים מהסוף להתחלה.</span>";
+      contentArea.innerHTML = `
+        <p>
+          כעת מתחילה המשימה בחלק <span class="highlight-strong">"אחורה"</span>.
+          בכל שלב תופיע סדרת ספרות, ולאחר מכן עלייך להקליד אותן
+          <span class="highlight">בסדר הפוך</span> – מהספרה האחרונה לראשונה.
+        </p>
+      `;
+      footerEl.textContent =
+        "שימי לב במיוחד לכיוון. גם אם אינך בטוחה, נסי לענות כמיטב יכולתך.";
+      continueBtn.classList.add("hidden");
+      submitBtn.classList.remove("hidden");
+      responseArea.classList.add("hidden");
+
+      currentSpan = backwardConfig.minSpan;
+      resetSpanCounters();
+      scheduleNextTrial();
+    }
+
+    /**********************
+     * ניהול ניסויים
+     **********************/
+    function scheduleNextTrial() {
+      enableAllButtons();
+      responseInput.value = "";
+      responseArea.classList.add("hidden");
+      digitsArea.textContent = "";
+
+      const cfg = direction === "forward" ? forwardConfig : backwardConfig;
+
+      if (currentSpan > cfg.maxSpan) {
+        // הגענו לאורכי המקסימום – מסיימים חלק
+        if (phase === "task-forward") {
+          renderBreakScreen();
+        } else {
+          renderEndScreen();
+        }
+        return;
+      }
+
+      // מריצים ניסוי חדש באורך האקטואלי
+      currentSequence = makeRandomSequence(currentSpan);
+      showDigits(currentSequence);
+    }
+
+    function handleSubmit() {
+      if (isShowingDigits) return;
+
+      const ans = normalizeAnswer(responseInput.value);
+      if (!ans) {
+        responseInput.focus();
+        return;
+      }
+
+      const correctStr = getCorrectString(currentSequence, direction);
+
+      if (ans === correctStr) {
+        correctInSpan++;
+      } else {
+        errorsInSpan++;
+      }
+
+      const cfg = direction === "forward" ? forwardConfig : backwardConfig;
+
+      // כלל עצירה: שתי טעויות באותו אורך
+      if (errorsInSpan >= 2) {
+        if (direction === "forward") {
+          renderBreakScreen();
+        } else {
+          renderEndScreen();
+        }
+        return;
+      }
+
+      trialInSpan++;
+
+      if (trialInSpan >= TRIALS_PER_SPAN) {
+        // סיימנו את שתי הסדרות באותו אורך
+        const hadSuccess = correctInSpan > 0;
+        if (hadSuccess && currentSpan < cfg.maxSpan) {
+          currentSpan++;
+          resetSpanCounters();
+          scheduleNextTrial();
+        } else {
+          // או שלא הייתה הצלחה בשתי הסדרות אבל גם לא שתי טעויות (edge case),
+          // או שהגענו למקסימום – בשני המקרים מסיימים את החלק.
+          if (direction === "forward") {
+            renderBreakScreen();
+          } else {
+            renderEndScreen();
+          }
+        }
+      } else {
+        // יש עוד ניסוי באותו אורך
+        scheduleNextTrial();
+      }
+    }
+
+    submitBtn.addEventListener("click", handleSubmit);
+    responseInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        handleSubmit();
+      }
+    });
+
+    /**********************
+     * התחלת המטלה
+     **********************/
+    window.addEventListener("load", () => {
+      renderIntroForward();
+    });
+  </script>
+</body>
+</html>
