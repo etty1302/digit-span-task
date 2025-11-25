@@ -516,7 +516,13 @@ function finishTask(){
   $response.innerHTML = '';
 
   try{ if (window.gorilla && typeof gorilla.finish === 'function'){ gorilla.finish(); } }catch(e){}
-  const url = REDIRECT_URL + (REDIRECT_URL.includes('?') ? '&' : '?') + 'pid=' + encodeURIComponent(PID);
+  const totalTrials = trialLog.length;
+
+const url = REDIRECT_URL + (REDIRECT_URL.includes('?') ? '&' : '?')
+  + 'pid=' + encodeURIComponent(PID)
+  + '&digitRaw=' + encodeURIComponent(rawScore)
+  + '&digitTotalTrials=' + encodeURIComponent(totalTrials);
+
   setTimeout(()=>{ window.location.href = url; }, 600);
 }
 
